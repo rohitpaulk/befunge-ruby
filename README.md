@@ -1,6 +1,6 @@
 # Befunger
 
-Befunger is an interpreter for [Befunge](https://esolangs.org/wiki/Befunge) written in Ruby.
+Befunger is an interpreter for [Befunge](https://esolangs.org/wiki/Befunge) written in Ruby. I wrote this as an answer to [this Kata on codewars](https://www.codewars.com/kata/befunge-interpreter).
 
 ### Installation
 
