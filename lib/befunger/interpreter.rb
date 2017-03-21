@@ -145,11 +145,11 @@ module Befunger
 
       # Setter, Getter
       elsif ['p', 'g'].include? instruction
-        a = stack.pop
-        b = stack.pop
+        y = stack.pop
+        x = stack.pop
         case instruction
-        when 'p' then @code_array[a][b] = stack.pop.chr
-        when 'g' then stack.push @code_array[a][b].ord
+        when 'p' then @code_array[y][x] = stack.pop.chr
+        when 'g' then stack.push @code_array[y][x].ord
         end
 
       # Operations with one stack value
