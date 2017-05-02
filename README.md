@@ -21,6 +21,8 @@ Or install it yourself as:
 ## Usage
 
 ```
+require 'befunger'
+
 Befunge.run(code)
 ```
 
