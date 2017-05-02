@@ -1,23 +1,39 @@
 module Befunger
+  # {Befunger::Interpreter} is responsible for running Befunge code.
+  #
+  # The only input to the Interpreter is the code to be executed,
+  # passed in as a string. Lines are to be separated with the `\n`
+  # character.
+  #
+  # Example usage:
+  #
+  # ```
+  # output = Befunger::Interpreter.new(code_string).run
+  # ```
   class Interpreter
-    # The input is stored as a 2D array.
+    # The Befunge code to be run, stored as a 2D array of characters.
     #
     # For a program like this:
     #
+    # ```
     # >987v>.v
     # v456<  :
     # >321 ^ _@
+    # ```
     #
     # `code_array` will look like:
     #
+    # ```
     # [
     #   [">", "9", "8", "7", "v", ">", ".", "v"],
     #   ["v", "4", "5", "6", "<", " ", " ", ":"],
     #   [">", "3", "2", "1", " ", "^", " ", "_", "@"]
     # ]
+    # ```
     #
     attr_reader :code_array
 
+    # Human friendly constants for the direction to move a code_pointer in.
     DIRECTIONS = {
       right: { x: 1, y: 0 },
       down:  { x: 0, y: 1 },
@@ -30,14 +46,13 @@ module Befunger
     # This gets copied and then modified and passed from instruction to instruction
     # in the interpreter loop.
     #
-    # ------------
-    # CODE_POINTER
-    # ------------
+    # - ## `code_pointer`
     #
     # Denotes what the position of the current instruction is.
     #
     # `x` and `y` are positive values starting at 0, calculated like this:
     #
+    # ```
     # .----------------------------------------------> x
     # |
     # |
@@ -59,56 +74,70 @@ module Befunger
     #
     # y
     #
-    # --------------
-    # CODE_DIRECTION
-    # --------------
+    # ```
+    #
+    # ## `code_direction`
     #
     # The next direction to move `code_pointer` in.
     #
     # `x` and `y` are either 0, 1, or -1.
     #
-    # (x: 1, y: 0) means the next move is towards the right
-    # (x: 0, y: 1) means the next move is downwards
+    # - (x: 1, y: 0) means the next move is towards the right
+    # - (x: 0, y: 1) means the next move is downwards
+    # - ... so on and so forth.
     #
-    # ... so on and so forth. Human-friendly constants available in Interpreter::DIRECTIONS.
+    # Human-friendly constants available in {Interpreter::DIRECTIONS}.
     #
+    # ## `stack`
     #
-    # -----
-    # STACK
-    # -----
+    # A stack to store values, manipulated by the befunge code being run.
     #
-    # Self explanatory.
+    # ## `output`
     #
+    # Output returned from program, represented as an array of characters.
     INITIAL_STATE = {
-      code_pointer: {x: 0, y: 0}, # Instructions are evaluated from the top-right
+      code_pointer: {x: 0, y: 0}, # Instructions are evaluated from the top-left
       code_direction: Interpreter::DIRECTIONS[:right],
-      stack: []
+      stack: [],
+      output: []
     }
 
+    # @param code [String] the befunge code to be run. Lines must be separated with newline characters
     def initialize(code)
-      @code_array = code.split("\n").map { |line| line.split('') }
+      @code_array = code.split("\n").map { |line| line.chars }
     end
 
+    # @return [String] output of program execution
     def run
-      state = Interpreter::INITIAL_STATE
-      program_output = []
+      state = Interpreter::INITIAL_STATE # TODO: `deep_dup`?
 
       loop do
         instruction = get_instruction(state[:code_pointer])
 
         break if instruction == '@'
 
-        state, instruction_output = handle_instruction(instruction, state)
-        program_output.concat(instruction_output)
+        state = handle_instruction(instruction, state)
       end
 
-      program_output.join('')
+      state[:output].join('')
     end
 
+    private
+
+    # Returns the next instruction to be processed
+    #
+    # @param code_pointer [Hash] the current +code_pointer+, in the form: `{x: 0, y: 3}`
+    # @return [String] the next instruction to be processed
     def get_instruction(code_pointer)
       @code_array[code_pointer[:y]][code_pointer[:x]]
     end
 
+    # Moves the `code_pointer` in the specified `code_direction`, and returns the modified
+    # `code_pointer`
+    #
+    # @param code_pointer [Hash] the current +code_pointer+, in the form: `{x: 0, y: 3}`
+    # @param code_direction [Hash] the current +code_direction+, in the form: `{x: 0, y: 1}`
+    # @return [Hash] the modified `code_pointer`
     def move_pointer(code_pointer, code_direction)
       code_pointer[:x] += code_direction[:x]
       code_pointer[:y] += code_direction[:y]
@@ -116,12 +145,17 @@ module Befunger
       code_pointer
     end
 
+    # Given an `instruction` and `state` - processes the instruction and returns
+    # the modified `state`.
+    #
+    # @param instruction [String] the instruction to be executed
+    # @param state [Hash] the current interpreter state
+    # @return [Hash] the modified `state`
     def handle_instruction(instruction, state)
-      output         = []
-
-      stack          = state[:stack]
-      code_pointer   = state[:code_pointer]
-      code_direction = state[:code_direction]
+      output         = state[:output].dup
+      stack          = state[:stack].dup
+      code_pointer   = state[:code_pointer].dup
+      code_direction = state[:code_direction].dup
 
       # Numbers
       if ('0'..'9').include? instruction
@@ -205,15 +239,12 @@ module Befunger
         raise "Invalid Instruction '#{instruction}'"
       end
 
-      code_pointer = move_pointer(code_pointer, code_direction)
-
-      next_state = {
-        code_pointer: code_pointer,
+      {
+        code_pointer: move_pointer(code_pointer, code_direction),
         code_direction: code_direction,
-        stack: stack
+        stack: stack,
+        output: output
       }
-
-      return [next_state, output]
     end
   end
 end
