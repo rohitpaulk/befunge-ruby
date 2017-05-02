@@ -1,6 +1,8 @@
 # Befunger
 
-Befunger is an interpreter for [Befunge](https://esolangs.org/wiki/Befunge) written in Ruby. I wrote this as an answer to [this Kata on codewars](https://www.codewars.com/kata/befunge-interpreter).
+Befunge (without the 'r' at the end!) is a two-dimensional esoteric programming language invented in 1993 by Chris Pressey with the goal of being as difficult to compile as possible. (Source: [esolangs.org](https://esolangs.org/wiki/Befunge))
+
+Befunger is an interpreter for Befunge written in Ruby. I wrote this as an answer to [this Kata on codewars](https://www.codewars.com/kata/befunge-interpreter).
 
 ### Installation
 
